@@ -1,0 +1,4 @@
+uploaded-bills/
+.venv/
+.env
+temp.txt
