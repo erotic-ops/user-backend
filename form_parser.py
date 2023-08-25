@@ -2,7 +2,12 @@
 Form parser module
 """
 import random
+from os import remove
 import string
+from venv import logger
+from storage_module import upload_to_bucket
+import base64
+
 
 def print_the_upload_form(data: dict):
     print("=" * 8, "Basic info about the employee:", "=" * 8)
@@ -68,6 +73,7 @@ def print_the_upload_form(data: dict):
             print("Incidental amount: ", l["incidentalAmount"])
             print("Incidental bill: ", l["incidentalBill"])
 
+
 def generate_randome_string(N=8):
     return "".join(random.choices(string.ascii_letters + string.digits, k=N))
 
@@ -80,13 +86,24 @@ class FormParser:
 
     def upload(self):
         self.upload_the_travels()
-        
+
         return self.is_travel_upload
+
+    def upload_bill(self, file_str: str):
+        file_name = "uploaded-bills/" + generate_randome_string() + ".jpg"
+
+        with open(file_name, "wb") as f:
+            f.write(base64.b64decode(file_str))
+
+        bill_id = upload_to_bucket(file_name)
+        remove(file_name)
+
+        return bill_id
 
     def upload_the_travels(self):
         for c, i in enumerate(self.data["travels"]):
             print("[+] Travel #", c + 1)
-            
+
             new_data = {}
 
             new_data["empId"] = self.data["empId"]
@@ -109,18 +126,23 @@ class FormParser:
 
             if result:
                 print("[+] Travel details uploaded successfully")
+                logger.info(f"[+] Travel details uploaded successfully for {self.data['empId']}")
                 self.is_travel_upload *= True
-                
+
             else:
                 print("[+] Travel details failed to upload")
+                logger.warning(f"[+] Travel details failed to upload for {self.data['empId']}")
                 self.is_travel_upload *= False
 
     def upload_the_conveyances(self, data: list, travel_id: str):
         for c, i in enumerate(data):
             print("[+] Conveyance #", c + 1)
-            new_data = {}
 
-            new_data["conveyanceId"] = travel_id + "_" + generate_randome_string()
+            bill_id = self.upload_bill(i["conveyanceBill"])
+
+            new_data = {}
+            new_data["conveyanceId"] = bill_id
+            new_data["travelId"] = travel_id
             new_data["conveyanceDate"] = i["conveyanceDate"]
             new_data["conveyanceFrom"] = i["conveyanceFrom"]
             new_data["conveyanceTo"] = i["conveyanceTo"]
@@ -132,18 +154,24 @@ class FormParser:
 
             if result:
                 print("[+] Conveyance details uploaded successfully")
+                logger.info(f"[+] Conveyance details uploaded successfully for {self.data['empId']}")
                 self.is_travel_upload *= True
-                
+
             else:
                 print("[+] Conveyance details failed to upload")
+                logger.warning(f"[+] Conveyance details failed to upload for {self.data['empId']}")
                 self.is_travel_upload *= False
-                
+
     def upload_the_food_lodgings(self, data: list, travel_id: str):
         for c, i in enumerate(data):
             print("[+] Food and Lodging #", c + 1)
+
+            bill_id = self.upload_bill(i["foodLodgingBill"])
+
             new_data = {}
 
-            new_data["foodLodgingId"] = travel_id + "_" + generate_randome_string()
+            new_data["foodLodgingId"] = bill_id
+            new_data["travelId"] = travel_id
             new_data["foodLodgingDate"] = i["foodLodgingDate"]
             new_data["foodLodgingBillNo"] = i["foodLodgingBillNo"]
             new_data["foodLodgingHotel"] = i["foodLodgingHotel"]
@@ -154,18 +182,24 @@ class FormParser:
 
             if result:
                 print("[+] Food and Lodging details uploaded successfully")
+                logger.info(f"[+] Food and Lodging details uploaded successfully for {self.data['empId']}")
                 self.is_travel_upload *= True
-            
+
             else:
                 print("[+] Food and Lodging details failed to upload")
+                logger.warning(f"[+] Food and Lodging details failed to upload for {self.data['empId']}")
                 self.is_travel_upload *= False
-                
+
     def upload_the_incidentals(self, data: list, travel_id: str):
         for c, i in enumerate(data):
             print("[+] Incidental #", c + 1)
+
+            bill_id = self.upload_bill(i["incidentalBill"])
+
             new_data = {}
 
-            new_data["incidentalId"] = travel_id + "_" + generate_randome_string()
+            new_data["incidentalId"] = bill_id
+            new_data["travelId"] = travel_id
             new_data["incidentalDate"] = i["incidentalDate"]
             new_data["incidentalExpense"] = i["incidentalExpense"]
             new_data["incidentalRemarks"] = i["incidentalRemarks"]
@@ -175,8 +209,10 @@ class FormParser:
 
             if result:
                 print("[+] Incidental details uploaded successfully")
+                logger.info(f"[+] Incidental details uploaded successfully for {self.data['empId']}")
                 self.is_travel_upload *= True
-            
+
             else:
                 print("[+] Incidental details failed to upload")
+                logger.warning(f"[+] Incidental details failed to upload for {self.data['empId']}")
                 self.is_travel_upload *= False

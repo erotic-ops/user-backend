@@ -1,6 +1,10 @@
-from logtail import LogtailHandler
 import logging
 from os import environ
+
+from logtail import LogtailHandler
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SOURCE_TOKEN = environ.get("LOGS_SOURCE_TOKEN")
 
@@ -10,8 +14,8 @@ if SOURCE_TOKEN is None:
 
 handler = LogtailHandler(source_token=SOURCE_TOKEN)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 logger.handlers = []
 logger.addHandler(handler)
 
-logger.info("Hello World!")
+logger.info("[+] Program started")
