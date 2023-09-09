@@ -1,21 +1,38 @@
 import logging
+import socket
+from logging.handlers import SysLogHandler
 from os import environ
 
 from logtail import LogtailHandler
-from dotenv import load_dotenv
 
-load_dotenv()
+# Initialising the logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
-SOURCE_TOKEN = environ.get("LOGS_SOURCE_TOKEN")
+# Papertrail Logging
+HOST_ADDRESS = environ.get("PAPERTRAIL_HOST_ADDRESS")
+HOST_PORT = int(environ.get("PAPERTRAIL_HOST_PORT"))
 
-if SOURCE_TOKEN is None:
-    print("[+] Please set the environment variable")
-    exit(1)
 
+class ContextFilter(logging.Filter):
+    hostname = socket.gethostname()
+
+    def filter(self, record):
+        record.hostname = ContextFilter.hostname
+        return True
+
+
+syslog = SysLogHandler(address=(HOST_ADDRESS, HOST_PORT))
+syslog.addFilter(ContextFilter())
+
+log_format = "{asctime} | {hostname} | {filename} | {funcName} | {lineno} | {message}"
+formatter = logging.Formatter(log_format, style="{")
+syslog.setFormatter(formatter)
+logger.addHandler(syslog)
+
+# BetterStack Logging
+SOURCE_TOKEN = environ.get("BETTERSTACK_SOURCE_TOKEN")
 handler = LogtailHandler(source_token=SOURCE_TOKEN)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.handlers = []
 logger.addHandler(handler)
 
-logger.info("[+] Program started")
+logger.info("User form backend logging started")

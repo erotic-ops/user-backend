@@ -1,4 +1,3 @@
-from math import e
 import threading
 from os import environ
 
@@ -7,8 +6,7 @@ from dotenv import load_dotenv
 
 from logging_module import logger
 
-load_dotenv()
-
+# Creating the lock for the database
 db_lock = threading.RLock()
 
 
@@ -18,8 +16,8 @@ class Database:
     """
 
     def __init__(self):
-        print("[+] Database connecting...")
-        logger.info("[+] Database connecting...")
+        print("Database connecting...")
+        logger.info("Database connecting...")
 
         try:
             self.__connection = mysql.connector.connect(
@@ -28,32 +26,31 @@ class Database:
                 password=environ.get("DB_PASSWORD"),
                 database=environ.get("DB_DATABASE"),
                 autocommit=True,
-                use_pure=True
+                use_pure=True,
             )
             self.__cursor = self.__connection.cursor()
-            print("[+] Connected to the database")
-            logger.info("[+] Connected to the database")
+            print("Connected to the database")
+            logger.info("Connected to the database")
 
         except Exception as e:
             self.__connection = None
-            print("[+] An error occurred", e)
-            logger.critical(f"[+] An error occurred {e}")
+            print("An error occurred", type(e).__name__, e)
+            logger.critical(f"An error occurred {type(e).__name__} {e}")
 
     def is_db_connected(self):
         if self.__connection is not None:
             return True
-        else:
-            print("[+] Database is not connected")
-            logger.error("[+] Database is not connected")
-            return False
+        print("Database is not connected")
+        logger.error("Database is not connected")
+        return False
 
     def disconnect(self):
         if self.__connection is not None:
             self.__connection.close()
             self.__cursor.close()
 
-            print("[+] Disconnected from the database")
-            logger.info("[+] Disconnected from the database")
+            print("Disconnected from the database")
+            logger.info("Disconnected from the database")
 
     def upload_the_travel(self, data: dict):
         """
@@ -79,14 +76,14 @@ class Database:
                     data["travelIncidemtal"],
                     data["travelTotal"],
                     0,
-                    0
+                    0,
                 ),
             )
             self.__connection.commit()
 
         except mysql.connector.Error as e:
-            print("[+] An error occurred while uploading the travel details", e)
-            logger.warning(f"[+] An error occurred while uploading the travel details {e}")
+            print("An error occurred while uploading the travel details", e)
+            logger.warning(f"An error occurred while uploading the travel details {e}")
 
             db_lock.release()
             return False
@@ -119,8 +116,8 @@ class Database:
             self.__connection.commit()
 
         except mysql.connector.Error as e:
-            print("[+] An error occurred while uploading the conveyance details", e)
-            logger.warning(f"[+] An error occurred while uploading the conveyance details {e}")
+            print("An error occurred while uploading the conveyance details", e)
+            logger.warning(f"An error occurred while uploading the conveyance details {e}")
 
             db_lock.release()
             return False
@@ -152,8 +149,8 @@ class Database:
             self.__connection.commit()
 
         except mysql.connector.Error as e:
-            print("[+] An error occurred while uploading the food and lodging details", e)
-            logger.warning(f"[+] An error occurred while uploading the food and lodging details {e}")
+            print("An error occurred while uploading the food and lodging details", e)
+            logger.warning(f"An error occurred while uploading the food and lodging details {e}")
 
             db_lock.release()
             return False
@@ -184,8 +181,8 @@ class Database:
             self.__connection.commit()
 
         except mysql.connector.Error as e:
-            print("[+] An error occurred while uploading the incidental details", e)
-            logger.warning(f"[+] An error occurred while uploading the incidental details {e}")
+            print("An error occurred while uploading the incidental details", e)
+            logger.warning(f"An error occurred while uploading the incidental details {e}")
 
             db_lock.release()
             return False

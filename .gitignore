@@ -2,4 +2,6 @@ __pycache__/
 .venv/
 uploaded-bills/
 .env
+.dockerignore
+*.log
 temp.*
