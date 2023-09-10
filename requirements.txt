@@ -4,3 +4,4 @@ mysql-connector-python
 appwrite
 logtail-python
 python-dotenv
+redis
