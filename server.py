@@ -38,7 +38,7 @@ class FormParser:
 
             new_data = {
                 "empId": self.data["empId"],
-                "travelId": travel_id
+                "travelId": travel_id,
                 "travelDate": i["travelDate"],
                 "travelFrom": i["travelFrom"],
                 "travelTo": i["travelTo"],
