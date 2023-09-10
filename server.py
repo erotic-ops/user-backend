@@ -1,7 +1,6 @@
-from functools import cache
 import random
 import string
-from os import environ, listdir
+from os import environ
 
 import requests
 from flask import Flask, jsonify, request
