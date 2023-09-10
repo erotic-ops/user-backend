@@ -191,6 +191,35 @@ class Database:
             db_lock.release()
             return True
 
+    def get_all_bill_from_travel_id(self, travel_id: str):
+        """
+        Get all the bill ids from the travel id
+        """
+        all_bills = [] # [(bill_id, amount), (bill_id, amount), ...)]
+            
+        db_lock.acquire()
+
+        try:
+            self.__cursor.execute("SELECT con_id, amount FROM conveyance WHERE travel_id = %s", (travel_id,))
+            all_bills.extend(self.__cursor.fetchall())
+
+            self.__cursor.execute("SELECT fl_id, amount FROM food_lodging WHERE travel_id = %s", (travel_id,))
+            all_bills.extend(self.__cursor.fetchall())
+
+            self.__cursor.execute("SELECT inc_id, amount FROM incidental WHERE travel_id = %s", (travel_id,))
+            all_bills.extend(self.__cursor.fetchall())
+
+        except mysql.connector.Error as e:
+            print("An error occurred while getting the bill ids", e)
+            logger.warning(f"An error occurred while getting the bill ids {e}")
+
+            db_lock.release()
+            return None
+
+        else:
+            db_lock.release()
+            return all_bills
+
 
 if __name__ == "__main__":
     db = Database()

@@ -1,6 +1,7 @@
+from functools import cache
 import random
 import string
-from os import environ
+from os import environ, listdir
 
 import requests
 from flask import Flask, jsonify, request
@@ -8,6 +9,7 @@ from flask import Flask, jsonify, request
 from database_module import Database
 from logging_module import logger
 from storage_module import Storage
+from cache_module import Cache
 
 app = Flask(__name__)
 
@@ -26,12 +28,17 @@ class FormParser:
         return "".join(random.choices(string.ascii_letters + string.digits, k=N))
 
     def upload_the_travels(self):
+        travel_ids = []
+
         for c, i in enumerate(self.data["travels"]):
+            travel_id = self.data["empId"] + "_" + self.generate_random_string()
+            travel_ids.append(travel_id)
+
             print("Travel #", c + 1)
 
             new_data = {
                 "empId": self.data["empId"],
-                "travelId": self.data["empId"] + "_" + self.generate_random_string(5),
+                "travelId": travel_id
                 "travelDate": i["travelDate"],
                 "travelFrom": i["travelFrom"],
                 "travelTo": i["travelTo"],
@@ -58,7 +65,7 @@ class FormParser:
                 logger.warning(f"Travel details failed to upload for {self.data['empId']}")
                 self.is_travel_upload *= False
 
-        return self.is_travel_upload
+        return self.is_travel_upload, travel_ids
 
     def upload_the_conveyances(self, data: list, travel_id: str):
         for c, i in enumerate(data):
@@ -169,8 +176,56 @@ class Notification:
         print(response.status_code)
         print(response.text)
 
-        # return response.json()["status"] == "success"
+        return response.json()["status"] == "success"
 
+    def send_sms(self, subject: str, receivers: list, message: str) -> bool:
+        """Method to send the message to the user
+
+        Return: True if the message is sent successfully else False
+        """
+
+        req_headers = {"Authorization": f"Bearer {AUTH_TOKEN}", "Content-Type": "application/json"}
+        json_message = {"subject": subject, "receiver": receivers, "message": message}
+        response = requests.post(
+            url=f"{NOTIFICATION_SERVER}/sms",
+            json=json_message,
+            headers=req_headers,
+        )
+
+        print(response.status_code)
+        print(response.text)
+
+        return response.json()["status"] == "success"
+    
+def match_the_values(self, travel_ids: list) -> dict:
+    """Method to match the values from the cache
+
+    Return: Dictionary of values
+    """
+
+    for travel_id in travel_ids:
+        all_bills = db_obj.get_all_bill_from_travel_id(travel_id)
+
+        if all_bills is None or len(all_bills) == 0:
+            print("No bills found")
+            logger.warning(f"No bills found for {travel_id}")
+
+            return False
+
+        bill_ids = [i[0] for i in all_bills]
+        bill_amounts = [i[1] for i in all_bills]
+
+        cache_amounts = cache_obj.get_all_values(bill_ids)
+
+        for bill_amount, cache_amount in zip(bill_amounts, cache_amounts):
+
+            if bill_amount == cache_amount:
+                print("Same amount", bill_amount, cache_amount)
+
+            else:
+                print("Different amount", bill_amount, cache_amount)
+
+        
 
 # ====== App routes ======
 
@@ -201,7 +256,11 @@ def upload_form_data():
 
     form = FormParser(data=request.json)
 
-    if form.upload_the_travels():
+    travel_status, travel_ids = form.upload_the_travels()
+    if travel_status:
+
+        bill_status = match_the_values(travel_ids)
+
         Notification().send_email("Form uploaded successfully", ["hm0092374@gmail.com"], "Form uploaded successfully")
         msg = {"status": "success", "message": "Form data uploaded successfully"}
         logger.info(f"Form data uploaded successfully for {request.json['empId']}")
@@ -215,10 +274,19 @@ def upload_form_data():
     return jsonify(msg), 500
 
 
-if __name__ == "__main__":
-    db_obj = Database()
-    storage_obj = Storage()
+db_obj = Database()
+storage_obj = Storage()
+cache_obj = Cache()
 
-    if db_obj.is_db_connected():
-        app.run(debug=True, host="0.0.0.0", port=5000)
-        db_obj.disconnect()
+if db_obj.is_db_connected():
+    print("Database connected successfully")
+    logger.info("Database connected successfully")
+
+else:
+    print("Database failed to connect")
+    logger.warning("Database failed to connect")
+    exit()
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
+    db_obj.disconnect()
