@@ -3,5 +3,5 @@ __pycache__/
 uploaded-bills/
 .env
 .dockerignore
+fly.toml
 *.log
-temp.*

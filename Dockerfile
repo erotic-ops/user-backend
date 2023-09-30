@@ -1,6 +1,6 @@
 FROM python
 
-WORKDIR ~/server
+WORKDIR /home/app/server
 
 COPY . .
 

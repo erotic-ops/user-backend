@@ -200,13 +200,13 @@ class Database:
         db_lock.acquire()
 
         try:
-            self.__cursor.execute("SELECT con_id, amount FROM conveyance WHERE travel_id = %s", (travel_id,))
+            self.__cursor.execute("SELECT conveyanceId, conveyanceAmount FROM conveyance WHERE travelId = %s", (travel_id,))
             all_bills.extend(self.__cursor.fetchall())
 
-            self.__cursor.execute("SELECT fl_id, amount FROM food_lodging WHERE travel_id = %s", (travel_id,))
+            self.__cursor.execute("SELECT foodLodgingId, foodLodgingAmount FROM food_lodging WHERE travelId = %s", (travel_id,))
             all_bills.extend(self.__cursor.fetchall())
 
-            self.__cursor.execute("SELECT inc_id, amount FROM incidental WHERE travel_id = %s", (travel_id,))
+            self.__cursor.execute("SELECT incidentalId, incidentalAmount FROM incidental WHERE travelId = %s", (travel_id,))
             all_bills.extend(self.__cursor.fetchall())
 
         except mysql.connector.Error as e:

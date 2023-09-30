@@ -35,4 +35,8 @@ SOURCE_TOKEN = environ.get("BETTERSTACK_SOURCE_TOKEN")
 handler = LogtailHandler(source_token=SOURCE_TOKEN)
 logger.addHandler(handler)
 
-logger.info("User form backend logging started")
+# Stream Logging
+stream_handler = logging.StreamHandler()
+logger.addHandler(stream_handler)
+
+print("User form backend logging started")

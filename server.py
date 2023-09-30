@@ -1,6 +1,7 @@
 import random
 import string
 from os import environ
+from threading import Thread
 
 import requests
 from flask import Flask, jsonify, request
@@ -158,7 +159,8 @@ class Notification:
         # self.receivers = receivers
         # self.message = message
 
-    def send_email(self, subject: str, receivers: list, message: str) -> bool:
+    @classmethod
+    def send_email(cls, subject: str, receivers: list, message: str) -> bool:
         """Method to send the message to the user
 
         Return: True if the message is sent successfully else False
@@ -196,7 +198,7 @@ class Notification:
 
         return response.json()["status"] == "success"
     
-def match_the_values(self, travel_ids: list) -> dict:
+def match_the_values(travel_ids: list) -> dict:
     """Method to match the values from the cache
 
     Return: Dictionary of values
@@ -258,15 +260,18 @@ def upload_form_data():
     travel_status, travel_ids = form.upload_the_travels()
     if travel_status:
 
-        bill_status = match_the_values(travel_ids)
+        print(travel_ids)
 
-        Notification().send_email("Form uploaded successfully", ["hm0092374@gmail.com"], "Form uploaded successfully")
+        bill_status = match_the_values(travel_ids)
+        print(bill_status)
+
+        Thread(target=Notification.send_email, args=("Form uploaded successfully", ["hm0092374@gmail.com"], "Form uploaded successfully")).start()
         msg = {"status": "success", "message": "Form data uploaded successfully"}
         logger.info(f"Form data uploaded successfully for {request.json['empId']}")
 
         return jsonify(msg), 200
 
-    Notification().send_email("Form failed to upload", ["hm0092374@gmail.com"], "Form failed to upload")
+    Thread(target=Notification.send_email, args=("Form failed to upload", ["hm0092374@gmail.com"], "Form failed to upload")).start()
     msg = {"status": "failure", "message": "Form data failed to upload"}
     logger.warning(f"Form data failed to upload for {request.json['empId']}")
 
