@@ -260,18 +260,18 @@ def upload_form_data():
     travel_status, travel_ids = form.upload_the_travels()
     if travel_status:
 
-        print(travel_ids)
+        print('travel_ids', travel_ids)
 
         bill_status = match_the_values(travel_ids)
-        print(bill_status)
+        print('bill_status', bill_status)
 
-        Thread(target=Notification.send_email, args=("Form uploaded successfully", ["hm0092374@gmail.com"], "Form uploaded successfully")).start()
+        # Thread(target=Notification.send_email, args=("Form uploaded successfully", ["hm0092374@gmail.com"], "Form uploaded successfully")).start()
         msg = {"status": "success", "message": "Form data uploaded successfully"}
         logger.info(f"Form data uploaded successfully for {request.json['empId']}")
 
         return jsonify(msg), 200
 
-    Thread(target=Notification.send_email, args=("Form failed to upload", ["hm0092374@gmail.com"], "Form failed to upload")).start()
+    # Thread(target=Notification.send_email, args=("Form failed to upload", ["hm0092374@gmail.com"], "Form failed to upload")).start()
     msg = {"status": "failure", "message": "Form data failed to upload"}
     logger.warning(f"Form data failed to upload for {request.json['empId']}")
 

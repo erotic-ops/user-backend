@@ -63,8 +63,8 @@ class Database:
             self.__cursor.execute(
                 "INSERT INTO travel VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
-                    data["empId"],
                     data["travelId"],
+                    data["empId"],
                     data["travelDate"],
                     data["travelFrom"],
                     data["travelTo"],

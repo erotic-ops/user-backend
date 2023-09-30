@@ -1,4 +1,4 @@
-from os import environ, mkdir, remove
+from os import environ
 import base64
 import random
 import string
@@ -13,12 +13,6 @@ APPWRITE_PROJECT_ID = environ.get("APPWRITE_PROJECT_ID")
 APPWRITE_API_KEY = environ.get("APPWRITE_API_KEY")
 APPWRITE_BUCKET_ID = environ.get("APPWRITE_BUCKET_ID")
 
-# Make the directory if it doesn't exist
-try:
-    mkdir("uploaded-bills")
-except FileExistsError:
-    pass
-
 
 class Storage:
     def __init__(self):
@@ -29,27 +23,15 @@ class Storage:
     def generate_random_string(self, N=8):
         return "".join(random.choices(string.ascii_letters + string.digits, k=N))
 
-    def upload_image(self, file_str: str):
-        file_name = f"uploaded-bills/{self.generate_random_string()}.jpg"
+    def upload_image(self, file_str: str) -> str:
+        file_name = f"{self.generate_random_string()}.jpg"
+        file_data = base64.b64decode(file_str)
 
-        with open(file_name, "wb") as f:
-            f.write(base64.b64decode(file_str))
-
-        bill_id = self.__upload(file_name)
-        remove(file_name)
-
-        return bill_id
-
-    def __upload(self, file_path: str):
-        result = self.storage_app.create_file(
-            APPWRITE_BUCKET_ID,
-            ID.unique(),
-            input_file.InputFile.from_path(file_path),
-        )
+        result = self.storage_app.create_file(APPWRITE_BUCKET_ID, ID.unique(), input_file.InputFile.from_bytes(file_data, file_name, "image/jpeg"))
 
         return result["$id"]
 
 
 if __name__ == "__main__":
     s = Storage()
-    print(s._Storage__upload(r"C:\Users\Harshit Music\Pictures\h.jpg"))
+    print(s.upload_image(r"C:\Users\Harshit Music\Pictures\1692199673102.jpg"))
