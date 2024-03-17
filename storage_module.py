@@ -1,12 +1,11 @@
-from os import environ
 import base64
 import random
 import string
+from os import environ
 
-from appwrite import client
-from appwrite import input_file
-from appwrite.services import storage
+from appwrite import client, input_file
 from appwrite.id import ID
+from appwrite.services import storage
 
 # ====== Environment Variables ======
 APPWRITE_PROJECT_ID = environ.get("APPWRITE_PROJECT_ID")

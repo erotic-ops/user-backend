@@ -26,9 +26,12 @@ def print_the_upload_form(data: dict):
         print("Travel total: ", i["travelTotal"])
         print()
         print("=" * 8, "Travel details:", "=" * 8)
-        print("Length of conveyances: ", len(i["travelDetails"]["conveyances"]))
-        print("Length of food and lodgings: ", len(i["travelDetails"]["foodLodgings"]))
-        print("Length of incidentals: ", len(i["travelDetails"]["incidentals"]))
+        print("Length of conveyances: ", len(
+            i["travelDetails"]["conveyances"]))
+        print("Length of food and lodgings: ", len(
+            i["travelDetails"]["foodLodgings"]))
+        print("Length of incidentals: ", len(
+            i["travelDetails"]["incidentals"]))
         print()
         print("=" * 8, "Conveyances:", "=" * 8)
         for c, j in enumerate(i["travelDetails"]["conveyances"]):
@@ -61,3 +64,61 @@ def print_the_upload_form(data: dict):
             print("Incidental remarks: ", l["incidentalRemarks"])
             print("Incidental amount: ", l["incidentalAmount"])
             print("Incidental bill: ", l["incidentalBill"])
+
+
+class Notification:
+    """Notification class to send the email and SMS to the user"""
+
+    def __init__(self) -> None:
+        """
+        Keyword arguments:
+        subject -- Subject of the message
+        receivers -- List of receivers
+        message -- Message to be sent
+        """
+        # self.subject = subject
+        # self.receivers = receivers
+        # self.message = message
+
+    @classmethod
+    def send_email(cls, subject: str, receivers: list, message: str) -> bool:
+        """Method to send the message to the user
+
+        Return: True if the message is sent successfully else False
+        """
+
+        req_headers = {"Authorization": f"Bearer {
+            AUTH_TOKEN}", "Content-Type": "application/json"}
+        json_message = {"subject": subject,
+                        "receiver": receivers, "message": message}
+        response = requests.post(
+            url=f"{NOTIFICATION_SERVER}/email",
+            json=json_message,
+            headers=req_headers,
+        )
+
+        print(response.status_code)
+        print(response.text)
+
+        return response.json()["status"] == "success"
+
+    def send_sms(self, subject: str, receivers: list, message: str) -> bool:
+        """Method to send the message to the user
+
+        Return: True if the message is sent successfully else False
+        """
+
+        req_headers = {"Authorization": f"Bearer {
+            AUTH_TOKEN}", "Content-Type": "application/json"}
+        json_message = {"subject": subject,
+                        "receiver": receivers, "message": message}
+        response = requests.post(
+            url=f"{NOTIFICATION_SERVER}/sms",
+            json=json_message,
+            headers=req_headers,
+        )
+
+        print(response.status_code)
+        print(response.text)
+
+        return response.json()["status"] == "success"

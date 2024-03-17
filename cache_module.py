@@ -1,5 +1,6 @@
-import redis
 from os import environ
+
+import redis
 
 REDIS_HOST = environ.get("REDIS_HOST")
 REDIS_PORT = int(environ.get("REDIS_PORT"))

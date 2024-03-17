@@ -1,6 +1,8 @@
 flask
 gunicorn
-mysql-connector-python
+sqlalchemy
+mysqlclient
+waitress
 appwrite
 logtail-python
 python-dotenv
