@@ -59,8 +59,8 @@ def upload_form_data():
 
         print('travel_ids', travel_ids)
 
-        bill_status = match_the_values(travel_ids)
-        print('bill_status', bill_status)
+        # bill_status = match_the_values(travel_ids)
+        # print('bill_status', bill_status)
 
         # Thread(target=Notification.send_email, args=("Form uploaded successfully", ["hm0092374@gmail.com"], "Form uploaded successfully")).start()
         msg = {"status": "success", "message": "Form data uploaded successfully"}

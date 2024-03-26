@@ -73,7 +73,7 @@ class Database:
                     data["travelFare"],
                     data["travelConveyance"],
                     data["travelFoodLodging"],
-                    data["travelIncidemtal"],
+                    data["travelIncidental"],
                     data["travelTotal"],
                     0,
                     0,
@@ -83,8 +83,7 @@ class Database:
 
         except mysql.connector.Error as e:
             print("An error occurred while uploading the travel details", e)
-            logger.warning(
-                f"An error occurred while uploading the travel details {e}")
+            logger.warning(f"An error occurred while uploading the travel details {e}")
 
             db_lock.release()
             return False
@@ -118,8 +117,7 @@ class Database:
 
         except mysql.connector.Error as e:
             print("An error occurred while uploading the conveyance details", e)
-            logger.warning(
-                f"An error occurred while uploading the conveyance details {e}")
+            logger.warning(f"An error occurred while uploading the conveyance details {e}")
 
             db_lock.release()
             return False
@@ -152,8 +150,7 @@ class Database:
 
         except mysql.connector.Error as e:
             print("An error occurred while uploading the food and lodging details", e)
-            logger.warning(
-                f"An error occurred while uploading the food and lodging details {e}")
+            logger.warning(f"An error occurred while uploading the food and lodging details {e}")
 
             db_lock.release()
             return False
@@ -185,8 +182,7 @@ class Database:
 
         except mysql.connector.Error as e:
             print("An error occurred while uploading the incidental details", e)
-            logger.warning(
-                f"An error occurred while uploading the incidental details {e}")
+            logger.warning(f"An error occurred while uploading the incidental details {e}")
 
             db_lock.release()
             return False
@@ -204,16 +200,13 @@ class Database:
         db_lock.acquire()
 
         try:
-            self.__cursor.execute(
-                "SELECT conveyanceId, conveyanceAmount FROM conveyance WHERE travelId = %s", (travel_id,))
+            self.__cursor.execute("SELECT conveyanceId, conveyanceAmount FROM conveyance WHERE travelId = %s", (travel_id,))
             all_bills.extend(self.__cursor.fetchall())
 
-            self.__cursor.execute(
-                "SELECT foodLodgingId, foodLodgingAmount FROM food_lodging WHERE travelId = %s", (travel_id,))
+            self.__cursor.execute("SELECT foodLodgingId, foodLodgingAmount FROM food_lodging WHERE travelId = %s", (travel_id,))
             all_bills.extend(self.__cursor.fetchall())
 
-            self.__cursor.execute(
-                "SELECT incidentalId, incidentalAmount FROM incidental WHERE travelId = %s", (travel_id,))
+            self.__cursor.execute("SELECT incidentalId, incidentalAmount FROM incidental WHERE travelId = %s", (travel_id,))
             all_bills.extend(self.__cursor.fetchall())
 
         except mysql.connector.Error as e:

@@ -69,7 +69,7 @@ class FormParser:
                 "travelFare": i["travelFare"],
                 "travelConveyance": i["travelConveyance"],
                 "travelFoodLodging": i["travelFoodLodging"],
-                "travelIncidemtal": i["travelIncidemtal"],
+                "travelIncidental": i["travelIncidental"],
                 "travelTotal": i["travelTotal"],
             }
 
