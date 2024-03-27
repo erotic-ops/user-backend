@@ -1,5 +1,8 @@
 import random
 import string
+from os import environ
+
+import requests
 
 from cache_module import Cache
 from database_module import Database
@@ -9,6 +12,25 @@ from storage_module import Storage
 db_obj = Database()
 storage_obj = Storage()
 cache_obj = Cache()
+
+def random_string(N=10):
+    return "".join(random.choices(string.ascii_letters + string.digits, k=N))
+
+def send_email(receivers: list[str], subject: str, message: str) -> bool:
+    """Method to send email
+
+    Return: True if email sent successfully
+    """
+    url = environ.get("NOTIFICATION_SERVER_URL", "")
+    head = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {environ.get('AUTH_TOKEN')}"
+    }
+    json_data = {"receiver": receivers, "subject": subject, "message": message}
+
+    response = requests.post(url, json=json_data, headers=head, timeout=5)
+    print(response.text)
+    return response.status_code == 200
 
 
 def match_the_values(travel_ids: list) -> dict:
@@ -98,7 +120,7 @@ class FormParser:
         for c, i in enumerate(data):
             print("Conveyance #", c + 1)
 
-            bill_id = storage_obj.upload_image(i["conveyanceBill"])
+            bill_id = random_string()
 
             new_data = {
                 "conveyanceId": bill_id,
@@ -125,9 +147,9 @@ class FormParser:
     def upload_the_food_lodgings(self, data: list, travel_id: str):
         for c, i in enumerate(data):
             print("Food and Lodging #", c + 1)
-
-            bill_id = storage_obj.upload_image(i["foodLodgingBill"])
-
+            
+            bill_id = random_string()
+            
             new_data = {
                 "foodLodgingId": bill_id,
                 "travelId": travel_id,
@@ -154,7 +176,7 @@ class FormParser:
         for c, i in enumerate(data):
             print("Incidental #", c + 1)
 
-            bill_id = storage_obj.upload_image(i["incidentalBill"])
+            bill_id = random_string()
 
             new_data = {
                 "incidentalId": bill_id,
