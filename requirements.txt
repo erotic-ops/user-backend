@@ -7,3 +7,4 @@ appwrite
 logtail-python
 python-dotenv
 redis
+mysql-connector-python
