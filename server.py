@@ -3,11 +3,9 @@ from threading import Thread
 
 from flask import Flask, jsonify, request
 
-from cache_module import Cache
-from database_module import Database
-from logging_module import logger
-from storage_module import Storage
-from helper_module import FormParser, match_the_values, send_email
+from modules.logging_module import logger
+from modules.database_module import Database
+from modules.helper_module import FormParser, send_email
 
 # Importing all environment variables
 # Windows: FOR /F "eol=# tokens=*" %i IN (.env) DO SET %i
@@ -21,12 +19,12 @@ app.secret_key = environ.get("AUTH_TOKEN")
 
 
 # ====== App routes ======
-@app.route("/", methods=["POST", "OPTIONS", "PUT", "DELETE", "GET", "PATCH", "HEAD", "TRACE", "CONNECT", "COPY", "LOCK", "MKCOL", "MOVE", "PURGE", "PROPFIND", "PROPPATCH", "SEARCH", "UNLOCK", "BIND", "REBIND", "UNBIND", "ACL", "REPORT", "MKACTIVITY", "CHECKOUT", "MERGE", "M-SEARCH", "NOTIFY", "SUBSCRIBE", "UNSUBSCRIBE", "PATCH", "PURGE", "MKCALENDAR", "LINK", "UNLINK", "SOURCE", "RAW"])
+@app.route("/", methods=["GET"])
 def home_page():
     return jsonify({"status": "success", "message": "Welcome to the user backend"})
 
 
-@app.route("/upload", methods=["POST", "OPTIONS", "PUT", "DELETE", "GET", "PATCH", "HEAD", "TRACE", "CONNECT", "COPY", "LOCK", "MKCOL", "MOVE", "PURGE", "PROPFIND", "PROPPATCH", "SEARCH", "UNLOCK", "BIND", "REBIND", "UNBIND", "ACL", "REPORT", "MKACTIVITY", "CHECKOUT", "MERGE", "M-SEARCH", "NOTIFY", "SUBSCRIBE", "UNSUBSCRIBE", "PATCH", "PURGE", "MKCALENDAR", "LINK", "UNLINK", "SOURCE", "RAW"])
+@app.route("/upload", methods=["POST"])
 def upload_form_data():
     auth_header = request.headers.get("Authorization", "")
 
@@ -55,9 +53,9 @@ def upload_form_data():
     print("Args", request.args)
 
     print("Employee ID:", request.json["empId"])
-    form = FormParser(data=request.json)
+    form = FormParser(db_obj)
 
-    travel_status, travel_ids = form.upload_the_travels()
+    travel_status, travel_ids = form.upload_the_travels(data=request.json)
     if travel_status:
 
         print('travel_ids', travel_ids)
@@ -80,8 +78,8 @@ def upload_form_data():
 
 
 db_obj = Database()
-storage_obj = Storage()
-cache_obj = Cache()
+# storage_obj = Storage()
+# cache_obj = Cache()
 
 if db_obj.is_db_connected():
     print("Database connected successfully")

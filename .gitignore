@@ -1,6 +1,7 @@
-__pycache__/
+**/__pycache__/
 .venv/
 uploaded-bills/
+modules/cacert.pem
 .env
 .dockerignore
 fly.toml
