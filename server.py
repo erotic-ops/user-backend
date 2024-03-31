@@ -3,11 +3,9 @@ from threading import Thread
 
 from flask import Flask, jsonify, request
 
-from cache_module import Cache
-from database_module import Database
-from logging_module import logger
-from storage_module import Storage
-from helper_module import FormParser, match_the_values, send_email
+from modules.logging_module import logger
+from modules.database_module import Database
+from modules.helper_module import FormParser, send_email
 
 # Importing all environment variables
 # Windows: FOR /F "eol=# tokens=*" %i IN (.env) DO SET %i
@@ -21,12 +19,12 @@ app.secret_key = environ.get("AUTH_TOKEN")
 
 
 # ====== App routes ======
-@app.route("/", methods=["POST", "OPTIONS", "PUT", "DELETE", "GET", "PATCH", "HEAD", "TRACE", "CONNECT", "COPY", "LOCK", "MKCOL", "MOVE", "PURGE", "PROPFIND", "PROPPATCH", "SEARCH", "UNLOCK", "BIND", "REBIND", "UNBIND", "ACL", "REPORT", "MKACTIVITY", "CHECKOUT", "MERGE", "M-SEARCH", "NOTIFY", "SUBSCRIBE", "UNSUBSCRIBE", "PATCH", "PURGE", "MKCALENDAR", "LINK", "UNLINK", "SOURCE", "RAW"])
+@app.route("/", methods=["GET"])
 def home_page():
     return jsonify({"status": "success", "message": "Welcome to the user backend"})
 
 
-@app.route("/upload", methods=["POST", "OPTIONS", "PUT", "DELETE", "GET", "PATCH", "HEAD", "TRACE", "CONNECT", "COPY", "LOCK", "MKCOL", "MOVE", "PURGE", "PROPFIND", "PROPPATCH", "SEARCH", "UNLOCK", "BIND", "REBIND", "UNBIND", "ACL", "REPORT", "MKACTIVITY", "CHECKOUT", "MERGE", "M-SEARCH", "NOTIFY", "SUBSCRIBE", "UNSUBSCRIBE", "PATCH", "PURGE", "MKCALENDAR", "LINK", "UNLINK", "SOURCE", "RAW"])
+@app.route("/upload", methods=["POST"])
 def upload_form_data():
     auth_header = request.headers.get("Authorization", "")
 
@@ -54,34 +52,42 @@ def upload_form_data():
     print("Headers", request.headers)
     print("Args", request.args)
 
-    print("Employee ID:", request.json["empId"])
-    form = FormParser(data=request.json)
+    try:
 
-    travel_status, travel_ids = form.upload_the_travels()
-    if travel_status:
+        print("Employee ID:", request.json["empId"])
+        form = FormParser(db_obj)
 
-        print('travel_ids', travel_ids)
+        travel_status, travel_ids = form.upload_the_travels(data=request.json)
+        if travel_status:
 
-        # bill_status = match_the_values(travel_ids)
-        # print('bill_status', bill_status)
+            print('travel_ids', travel_ids)
 
-        Thread(target=send_email, args=(["hm0092374@gmail.com"], "Form uploaded successfully", "Form uploaded successfully")).start()
-        msg = {"status": "success", "message": "Form data uploaded successfully"}
-        logger.info(f"Form data uploaded successfully for {
-                    request.json['empId']}")
+            # bill_status = match_the_values(travel_ids)
+            # print('bill_status', bill_status)
 
-        return jsonify(msg), 200
+            Thread(target=send_email, args=(["hm0092374@gmail.com"], "Form uploaded successfully", "Form uploaded successfully")).start()
+            msg = {"status": "success", "message": "Form data uploaded successfully"}
+            logger.info(f"Form data uploaded successfully for {
+                        request.json['empId']}")
 
-    Thread(target=send_email, args=(["hm0092374@gmail.com"], "Form failed to upload", "Form failed to upload")).start()
-    msg = {"status": "failure", "message": "Form data failed to upload"}
-    logger.warning(f"Form data failed to upload for {request.json['empId']}")
+            return jsonify(msg), 200
 
-    return jsonify(msg), 500
+        Thread(target=send_email, args=(["hm0092374@gmail.com"], "Form failed to upload", "Form failed to upload")).start()
+        msg = {"status": "failure", "message": "Form data failed to upload"}
+        logger.warning(f"Form data failed to upload for {request.json['empId']}")
+
+        return jsonify(msg), 500
+
+    except Exception as e:
+        print("Exception", type(e).__name__, e)
+        logger.error(f"Exception occurred: {e}")
+
+        return jsonify({"status": "failure", "message": f"Exception occurred: {e}"}), 400
 
 
 db_obj = Database()
-storage_obj = Storage()
-cache_obj = Cache()
+# storage_obj = Storage()
+# cache_obj = Cache()
 
 if db_obj.is_db_connected():
     print("Database connected successfully")
