@@ -1,0 +1,5 @@
+enabled: true
+auto: false
+pull_requests: true
+restylers:
+  - "*"
